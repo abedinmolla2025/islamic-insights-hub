@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { MapPin, Clock } from "lucide-react";
-import prayingPerson from "@/assets/praying-person.png";
+import prayingMan from "@/assets/praying-man.webp";
 
 interface PrayerHeroCardProps {
   location?: string;
@@ -125,7 +125,7 @@ const PrayerHeroCard = ({
         {/* Praying Person Image */}
         <div className="hidden sm:block animate-float">
           <img 
-            src={prayingPerson} 
+            src={prayingMan} 
             alt="Person praying" 
             className="w-36 h-36 object-contain drop-shadow-lg"
           />
