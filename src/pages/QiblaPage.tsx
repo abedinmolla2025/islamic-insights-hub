@@ -1,23 +1,14 @@
 import { useState, useEffect } from "react";
-import { Compass, Navigation, Loader2 } from "lucide-react";
+import { Compass, Navigation, Loader2, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { motion } from "framer-motion";
 
-// Mecca coordinates (Kaaba)
 const MECCA_LAT = 21.4225;
 const MECCA_LNG = 39.8262;
 
-interface QiblaCompassProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
+const QiblaPage = () => {
+  const navigate = useNavigate();
   const { location, isLoading } = usePrayerTimes();
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
   const [deviceHeading, setDeviceHeading] = useState<number | null>(null);
@@ -53,8 +44,6 @@ const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
   }, [location]);
 
   useEffect(() => {
-    if (!open) return;
-
     const handleOrientation = (event: DeviceOrientationEvent) => {
       if (event.alpha !== null) {
         setCompassSupported(true);
@@ -74,7 +63,7 @@ const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
     return () => {
       window.removeEventListener("deviceorientation", handleOrientation);
     };
-  }, [open]);
+  }, []);
 
   const requestCompassPermission = async () => {
     try {
@@ -109,36 +98,51 @@ const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader className="text-center">
-          <DrawerTitle className="flex items-center justify-center gap-2">
-            <Compass className="w-5 h-5 text-primary" />
-            Qibla Direction
-          </DrawerTitle>
-        </DrawerHeader>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border"
+      >
+        <div className="flex items-center gap-3 px-4 py-4">
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <Compass className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-bold">Qibla Direction</h1>
+        </div>
+      </motion.header>
 
+      <div className="p-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="flex flex-col items-center py-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center py-8"
+          >
             {/* Compass Container */}
-            <div className="relative w-56 h-56 mb-4">
+            <div className="relative w-72 h-72 mb-6">
               {/* Outer Ring */}
-              <div className="absolute inset-0 rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10" />
+              <div className="absolute inset-0 rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl" />
 
               {/* Cardinal Directions */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="absolute top-3 text-sm font-bold text-primary">N</span>
-                <span className="absolute bottom-3 text-sm font-medium text-muted-foreground">S</span>
-                <span className="absolute left-3 text-sm font-medium text-muted-foreground">W</span>
-                <span className="absolute right-3 text-sm font-medium text-muted-foreground">E</span>
+                <span className="absolute top-4 text-lg font-bold text-primary">N</span>
+                <span className="absolute bottom-4 text-lg font-medium text-muted-foreground">S</span>
+                <span className="absolute left-4 text-lg font-medium text-muted-foreground">W</span>
+                <span className="absolute right-4 text-lg font-medium text-muted-foreground">E</span>
               </div>
 
               {/* Degree Markers */}
-              <div className="absolute inset-2">
+              <div className="absolute inset-3">
                 {[...Array(72)].map((_, i) => (
                   <div
                     key={i}
@@ -147,7 +151,7 @@ const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
                   >
                     <div
                       className={`w-px ${
-                        i % 6 === 0 ? "h-3 bg-primary/40" : "h-1 bg-primary/20"
+                        i % 6 === 0 ? "h-4 bg-primary/40" : "h-2 bg-primary/20"
                       }`}
                     />
                   </div>
@@ -155,67 +159,75 @@ const QiblaCompass = ({ open, onOpenChange }: QiblaCompassProps) => {
               </div>
 
               {/* Inner Circle */}
-              <div className="absolute inset-8 rounded-full bg-background/80 backdrop-blur-sm border border-primary/10 shadow-inner" />
+              <div className="absolute inset-10 rounded-full bg-background/80 backdrop-blur-sm border border-primary/10 shadow-inner" />
 
               {/* Qibla Arrow */}
-              <div
-                className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
-                style={{ transform: `rotate(${getCompassRotation()}deg)` }}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{ rotate: getCompassRotation() }}
+                transition={{ type: "spring", stiffness: 50 }}
               >
                 <div className="relative h-full w-full flex items-center justify-center">
-                  <div className="absolute top-6 flex flex-col items-center">
+                  <div className="absolute top-8 flex flex-col items-center">
                     <Navigation
-                      className="w-7 h-7 text-primary fill-primary drop-shadow-lg"
+                      className="w-10 h-10 text-primary fill-primary drop-shadow-lg"
                       strokeWidth={1.5}
                     />
-                    <span className="text-xs font-bold text-primary mt-1">Qibla</span>
+                    <span className="text-sm font-bold text-primary mt-1">Qibla</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Center Point */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-3 h-3 rounded-full bg-primary shadow-lg" />
+                <div className="w-4 h-4 rounded-full bg-primary shadow-lg" />
               </div>
             </div>
 
             {/* Direction Info */}
             {qiblaDirection !== null && (
-              <div className="text-center space-y-2">
-                <p className="text-2xl font-bold text-primary">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-center space-y-3"
+              >
+                <p className="text-4xl font-bold text-primary">
                   {Math.round(qiblaDirection)}° {getDirectionLabel(qiblaDirection)}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground">
                   {location?.city && `From ${location.city}`}
                 </p>
                 {!compassSupported && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Point your device towards {getDirectionLabel(qiblaDirection)} to face Qibla
                   </p>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {typeof (DeviceOrientationEvent as any).requestPermission === "function" &&
               !compassSupported && (
-                <button
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   onClick={requestCompassPermission}
-                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors"
+                  className="mt-6 px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-medium hover:bg-primary/90 transition-colors"
                 >
                   Enable Compass
-                </button>
+                </motion.button>
               )}
 
             {compassSupported && deviceHeading !== null && (
-              <p className="text-xs text-green-600 mt-2">
+              <p className="text-sm text-green-600 mt-4 flex items-center gap-2">
                 ✓ Compass active - rotate your device
               </p>
             )}
-          </div>
+          </motion.div>
         )}
-      </DrawerContent>
-    </Drawer>
+      </div>
+    </div>
   );
 };
 
-export default QiblaCompass;
+export default QiblaPage;

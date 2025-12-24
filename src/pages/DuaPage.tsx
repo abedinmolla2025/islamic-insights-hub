@@ -1,18 +1,8 @@
 import { useState } from "react";
-import { Search, BookOpen, ChevronRight } from "lucide-react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { Search, BookOpen, ChevronRight, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface DuaCollectionProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { motion, AnimatePresence } from "framer-motion";
 
 const duas = [
   {
@@ -99,7 +89,8 @@ const duas = [
 
 const categories = [...new Set(duas.map((d) => d.category))];
 
-const DuaCollection = ({ open, onOpenChange }: DuaCollectionProps) => {
+const DuaPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDua, setSelectedDua] = useState<typeof duas[0] | null>(null);
@@ -118,103 +109,137 @@ const DuaCollection = ({ open, onOpenChange }: DuaCollectionProps) => {
       setSelectedDua(null);
     } else if (selectedCategory) {
       setSelectedCategory(null);
+    } else {
+      navigate("/");
     }
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
-            {(selectedDua || selectedCategory) && (
-              <button
-                onClick={handleBack}
-                className="mr-2 p-1 hover:bg-muted rounded-md transition-colors"
-              >
-                ←
-              </button>
-            )}
-            <BookOpen className="w-5 h-5 text-primary" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border"
+      >
+        <div className="flex items-center gap-3 px-4 py-4">
+          <button
+            onClick={handleBack}
+            className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <BookOpen className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-bold">
             {selectedDua ? selectedDua.title : selectedCategory || "Dua Collection"}
-          </DrawerTitle>
-        </DrawerHeader>
+          </h1>
+        </div>
+      </motion.header>
 
-        <div className="px-4 pb-6">
+      <AnimatePresence mode="wait">
         {selectedDua ? (
           // Dua Detail View
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6 py-4">
-              <div className="text-center space-y-4">
-                <p className="text-3xl font-arabic leading-loose text-primary">
-                  {selectedDua.arabic}
-                </p>
-                <p className="text-lg italic text-muted-foreground">
-                  {selectedDua.transliteration}
-                </p>
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <p className="text-sm font-medium">Translation:</p>
-                  <p className="text-foreground mt-1">{selectedDua.translation}</p>
-                </div>
-              </div>
+          <motion.div
+            key="detail"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="p-4 space-y-6"
+          >
+            <div className="text-center space-y-6 py-6">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-3xl font-arabic leading-loose text-primary"
+              >
+                {selectedDua.arabic}
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-lg italic text-muted-foreground"
+              >
+                {selectedDua.transliteration}
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-card rounded-2xl p-5 shadow-soft"
+              >
+                <p className="text-sm font-medium text-muted-foreground mb-2">Translation</p>
+                <p className="text-foreground text-lg">{selectedDua.translation}</p>
+              </motion.div>
             </div>
-          </ScrollArea>
+          </motion.div>
         ) : (
           // List View
-          <div className="space-y-4">
+          <motion.div
+            key="list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="p-4 space-y-4"
+          >
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Search duas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-12 h-12 rounded-2xl bg-card border-0 shadow-soft"
               />
             </div>
 
             {/* Categories */}
             {!selectedCategory && (
-              <div className="flex gap-2 flex-wrap">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex gap-2 flex-wrap"
+              >
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                    className="px-4 py-2 rounded-full text-sm font-medium bg-card text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all shadow-soft"
                   >
                     {cat}
                   </button>
                 ))}
-              </div>
+              </motion.div>
             )}
 
             {/* Dua List */}
-            <ScrollArea className="h-[50vh]">
-              <div className="space-y-2 pr-4">
-                {filteredDuas.map((dua) => (
-                  <button
-                    key={dua.id}
-                    onClick={() => setSelectedDua(dua)}
-                    className="w-full text-left p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <p className="font-medium">{dua.title}</p>
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {dua.transliteration}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <div className="space-y-3">
+              {filteredDuas.map((dua, index) => (
+                <motion.button
+                  key={dua.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => setSelectedDua(dua)}
+                  className="w-full text-left p-4 rounded-2xl bg-card shadow-soft hover:shadow-md transition-all active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="font-semibold text-foreground">{dua.title}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {dua.transliteration}
+                      </p>
                     </div>
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
         )}
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </AnimatePresence>
+    </div>
   );
 };
 
-export default DuaCollection;
+export default DuaPage;

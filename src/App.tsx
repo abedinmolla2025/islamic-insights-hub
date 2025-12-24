@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import BabyNamesPage from "./pages/BabyNamesPage";
+import QiblaPage from "./pages/QiblaPage";
+import TasbihPage from "./pages/TasbihPage";
+import DuaPage from "./pages/DuaPage";
+import QuranPage from "./pages/QuranPage";
+import NamesOfAllahPage from "./pages/NamesOfAllahPage";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +23,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/baby-names" element={<BabyNamesPage />} />
+          <Route path="/qibla" element={<QiblaPage />} />
+          <Route path="/tasbih" element={<TasbihPage />} />
+          <Route path="/dua" element={<DuaPage />} />
+          <Route path="/quran" element={<QuranPage />} />
+          <Route path="/99-names" element={<NamesOfAllahPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

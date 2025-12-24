@@ -1,21 +1,18 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, TargetAndTransition } from "framer-motion";
-import QiblaCompass from "./QiblaCompass";
-import TasbihCounter from "./TasbihCounter";
-import DuaCollection from "./DuaCollection";
 
 interface FeatureItem {
   emoji: string;
   label: string;
   animation: TargetAndTransition;
-  action?: string;
+  path: string;
 }
 
 const features: FeatureItem[] = [
   { 
     emoji: "📖", 
     label: "Quran",
+    path: "/quran",
     animation: {
       rotateY: [0, 15, 0, -15, 0],
       transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
@@ -24,7 +21,7 @@ const features: FeatureItem[] = [
   { 
     emoji: "🤲", 
     label: "Dua",
-    action: "dua",
+    path: "/dua",
     animation: {
       y: [0, -4, 0],
       scale: [1, 1.05, 1],
@@ -34,7 +31,7 @@ const features: FeatureItem[] = [
   { 
     emoji: "👶", 
     label: "Names",
-    action: "names",
+    path: "/baby-names",
     animation: {
       rotate: [-5, 5, -5],
       transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }
@@ -43,7 +40,7 @@ const features: FeatureItem[] = [
   { 
     emoji: "🧭", 
     label: "Qibla",
-    action: "qibla",
+    path: "/qibla",
     animation: {
       rotate: [0, 20, -20, 0],
       transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
@@ -52,7 +49,7 @@ const features: FeatureItem[] = [
   { 
     emoji: "📿", 
     label: "Tasbih",
-    action: "tasbih",
+    path: "/tasbih",
     animation: {
       y: [0, -3, 0],
       rotate: [0, 10, 0],
@@ -62,6 +59,7 @@ const features: FeatureItem[] = [
   { 
     emoji: "✨", 
     label: "99 Names",
+    path: "/99-names",
     animation: {
       scale: [1, 1.2, 1],
       opacity: [1, 0.8, 1],
@@ -72,54 +70,25 @@ const features: FeatureItem[] = [
 
 const FeatureIcons = () => {
   const navigate = useNavigate();
-  const [qiblaOpen, setQiblaOpen] = useState(false);
-  const [tasbihOpen, setTasbihOpen] = useState(false);
-  const [duaOpen, setDuaOpen] = useState(false);
-
-  const handleFeatureClick = (action?: string) => {
-    switch (action) {
-      case "qibla":
-        setQiblaOpen(true);
-        break;
-      case "tasbih":
-        setTasbihOpen(true);
-        break;
-      case "dua":
-        setDuaOpen(true);
-        break;
-      case "names":
-        navigate("/baby-names");
-        break;
-      default:
-        break;
-    }
-  };
 
   return (
-    <>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {features.map((feature, index) => (
-          <button
-            key={feature.label}
-            onClick={() => handleFeatureClick(feature.action)}
-            className="flex-shrink-0 group cursor-pointer w-16 h-16 bg-card rounded-2xl shadow-soft flex items-center justify-center hover:shadow-md transition-shadow"
-            style={{ animationDelay: `${index * 100}ms` }}
+    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      {features.map((feature, index) => (
+        <button
+          key={feature.label}
+          onClick={() => navigate(feature.path)}
+          className="flex-shrink-0 group cursor-pointer w-16 h-16 bg-card rounded-2xl shadow-soft flex items-center justify-center hover:shadow-md transition-shadow active:scale-95"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <motion.span
+            className="text-3xl"
+            animate={feature.animation}
           >
-            <motion.span
-              className="text-3xl"
-              animate={feature.animation}
-            >
-              {feature.emoji}
-            </motion.span>
-          </button>
-        ))}
-      </div>
-
-      {/* Modals */}
-      <QiblaCompass open={qiblaOpen} onOpenChange={setQiblaOpen} />
-      <TasbihCounter open={tasbihOpen} onOpenChange={setTasbihOpen} />
-      <DuaCollection open={duaOpen} onOpenChange={setDuaOpen} />
-    </>
+            {feature.emoji}
+          </motion.span>
+        </button>
+      ))}
+    </div>
   );
 };
 
