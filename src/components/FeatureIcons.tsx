@@ -1,41 +1,62 @@
-import {
-  AnimatedQuranIcon,
-  AnimatedDuaIcon,
-  AnimatedNamesIcon,
-  AnimatedQiblaIcon,
-  AnimatedTasbihIcon,
-  AnimatedMoonIcon,
-} from "./AnimatedIcons";
+import { motion, TargetAndTransition } from "framer-motion";
 
 interface FeatureItem {
-  icon: React.ReactNode;
+  emoji: string;
   label: string;
+  animation: TargetAndTransition;
 }
 
 const features: FeatureItem[] = [
   { 
-    icon: <AnimatedQuranIcon size={44} />, 
-    label: "Quran"
+    emoji: "📖", 
+    label: "Quran",
+    animation: {
+      rotateY: [0, 15, 0, -15, 0],
+      transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
   { 
-    icon: <AnimatedDuaIcon size={44} />, 
-    label: "Dua"
+    emoji: "🤲", 
+    label: "Dua",
+    animation: {
+      y: [0, -4, 0],
+      scale: [1, 1.05, 1],
+      transition: { duration: 2, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
   { 
-    icon: <AnimatedNamesIcon size={44} />, 
-    label: "Names"
+    emoji: "👶", 
+    label: "Names",
+    animation: {
+      rotate: [-5, 5, -5],
+      transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
   { 
-    icon: <AnimatedQiblaIcon size={44} />, 
-    label: "Qibla"
+    emoji: "🧭", 
+    label: "Qibla",
+    animation: {
+      rotate: [0, 20, -20, 0],
+      transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
   { 
-    icon: <AnimatedTasbihIcon size={44} />, 
-    label: "Tasbih"
+    emoji: "📿", 
+    label: "Tasbih",
+    animation: {
+      y: [0, -3, 0],
+      rotate: [0, 10, 0],
+      transition: { duration: 2, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
   { 
-    icon: <AnimatedMoonIcon size={44} />, 
-    label: "99 Names"
+    emoji: "✨", 
+    label: "99 Names",
+    animation: {
+      scale: [1, 1.2, 1],
+      opacity: [1, 0.8, 1],
+      transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" as const }
+    }
   },
 ];
 
@@ -45,14 +66,15 @@ const FeatureIcons = () => {
       {features.map((feature, index) => (
         <button
           key={feature.label}
-          className="feature-icon flex-shrink-0 group cursor-pointer"
+          className="flex-shrink-0 group cursor-pointer w-16 h-16 bg-card rounded-2xl shadow-soft flex items-center justify-center hover:shadow-md transition-shadow"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <div className="flex flex-col items-center gap-2">
-            <div className="group-hover:scale-110 transition-transform">
-              {feature.icon}
-            </div>
-          </div>
+          <motion.span
+            className="text-3xl"
+            animate={feature.animation}
+          >
+            {feature.emoji}
+          </motion.span>
         </button>
       ))}
     </div>
