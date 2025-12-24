@@ -4,6 +4,7 @@ import AudioRecitationCard from "@/components/AudioRecitationCard";
 import PrayerTimesList from "@/components/PrayerTimesList";
 import BottomNavigation from "@/components/BottomNavigation";
 import DailyHadith from "@/components/DailyHadith";
+import QiblaCompass from "@/components/QiblaCompass";
 
 const Index = () => {
   return (
@@ -31,8 +32,13 @@ const Index = () => {
           <PrayerTimesList />
         </section>
 
-        {/* Daily Hadith */}
+        {/* Qibla Compass */}
         <section className="animate-fade-in" style={{ animationDelay: "300ms" }}>
+          <QiblaCompass />
+        </section>
+
+        {/* Daily Hadith */}
+        <section className="animate-fade-in" style={{ animationDelay: "350ms" }}>
           <DailyHadith />
         </section>
       </main>
