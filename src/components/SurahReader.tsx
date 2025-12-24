@@ -59,32 +59,44 @@ const SurahReader = ({ surahNumber, surahName, arabicName }: SurahReaderProps) =
   }
 
   return (
-    <div className="pb-32">
-      {/* Surah Header */}
-      <div className="text-center py-6 border-b border-border">
+    <div className="pb-40">
+      {/* Decorative Bismillah Header */}
+      {surahNumber !== 1 && surahNumber !== 9 && (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative py-8 bg-gradient-to-b from-primary/5 to-transparent"
         >
-          <span className="text-3xl font-arabic text-primary">{arabicName}</span>
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+          </div>
+          <div className="relative text-center">
+            <motion.p
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="text-3xl font-arabic text-primary leading-loose"
+            >
+              بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </motion.p>
+            {language === "bengali" && (
+              <p className="text-sm text-muted-foreground mt-2">
+                পরম করুণাময় অসীম দয়ালু আল্লাহর নামে
+              </p>
+            )}
+          </div>
         </motion.div>
-        <h2 className="text-2xl font-bold">{surahName}</h2>
-        <p className="text-muted-foreground">
-          {arabicData?.ayahs.length} আয়াত
-        </p>
-      </div>
+      )}
 
       {/* Language Selector */}
-      <div className="sticky top-[60px] z-40 bg-background/95 backdrop-blur-lg py-3 px-4 border-b border-border">
+      <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-lg py-3 px-4 border-b border-border shadow-sm">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {(Object.keys(LANGUAGE_LABELS) as Language[]).map((lang) => (
             <button
               key={lang}
               onClick={() => setLanguage(lang)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 language === lang
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
@@ -94,60 +106,63 @@ const SurahReader = ({ surahNumber, surahName, arabicName }: SurahReaderProps) =
         </div>
       </div>
 
-      {/* Bismillah */}
-      {surahNumber !== 1 && surahNumber !== 9 && (
-        <div className="text-center py-6 border-b border-border">
-          <p className="text-2xl font-arabic text-primary leading-loose">
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-          </p>
-          {language === "bengali" && (
-            <p className="text-muted-foreground mt-2">
-              পরম করুণাময় অসীম দয়ালু আল্লাহর নামে
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Ayahs */}
-      <div className="divide-y divide-border">
+      <div className="divide-y divide-border/50">
         {arabicData?.ayahs.map((ayah, index) => (
           <motion.div
             key={ayah.number}
             ref={(el) => (ayahRefs.current[index] = el)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: index * 0.02 }}
-            className={`p-4 transition-colors duration-300 ${currentAyah === index ? "bg-primary/10 border-l-4 border-primary" : ""}`}
+            transition={{ delay: Math.min(index * 0.02, 0.5) }}
+            className={`p-4 transition-all duration-300 ${
+              currentAyah === index 
+                ? "bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-l-4 border-primary" 
+                : "hover:bg-muted/30"
+            }`}
           >
-            {/* Ayah Number & Play Button */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                  {ayah.numberInSurah}
-                </span>
+            {/* Ayah Header */}
+            <div className="flex items-center justify-between mb-4">
+              {/* Ayah Number with decorative frame */}
+              <div className="flex items-center gap-3">
+                <div className="relative w-10 h-10">
+                  <div className="absolute inset-0 rotate-45 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">{ayah.numberInSurah}</span>
+                  </div>
+                </div>
               </div>
-              <button
+              
+              {/* Play Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => handlePlayAyah(index)}
-                className={`p-2 rounded-full transition-colors ${
+                className={`p-2.5 rounded-full transition-all shadow-sm ${
                   currentAyah === index
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
                     : "bg-muted hover:bg-primary/20"
                 }`}
               >
                 <Play className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
 
             {/* Arabic Text */}
-            <p className="text-2xl font-arabic text-foreground leading-[2.5] text-right mb-4">
+            <p className="text-2xl md:text-3xl font-arabic text-foreground leading-[2.5] text-right mb-4 selection:bg-primary/20">
               {ayah.text}
+              <span className="inline-block mx-2 text-primary opacity-50">۝</span>
             </p>
 
             {/* Translation */}
             {translationData?.ayahs[index] && language !== "arabic" && (
-              <p className="text-muted-foreground leading-relaxed">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-muted-foreground leading-relaxed text-sm md:text-base border-l-2 border-primary/20 pl-4"
+              >
                 {translationData.ayahs[index].text}
-              </p>
+              </motion.p>
             )}
           </motion.div>
         ))}
