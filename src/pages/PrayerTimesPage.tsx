@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, MapPin, Bell, Clock, Sun, Moon, Sunrise, Sunset } from "lucide-react";
+import { ArrowLeft, MapPin, Bell, Clock, Sun, Moon, Sunrise, Sunset, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
-import { motion } from "framer-motion";
+import { useAthanNotification } from "@/hooks/useAthanNotification";
+import { motion, AnimatePresence } from "framer-motion";
+import AthanSettingsModal from "@/components/AthanSettingsModal";
 
 interface PrayerInfo {
   name: string;
@@ -18,6 +20,18 @@ const PrayerTimesPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [nextPrayer, setNextPrayer] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<string>("");
+  const [showAthanSettings, setShowAthanSettings] = useState(false);
+
+  const {
+    settings: athanSettings,
+    updateSettings: updateAthanSettings,
+    togglePrayer: toggleAthanPrayer,
+    isPlaying: isAthanPlaying,
+    currentPrayer: currentAthanPrayer,
+    playAthan,
+    stopAthan,
+    requestNotificationPermission,
+  } = useAthanNotification(prayerTimes);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -137,11 +151,49 @@ const PrayerTimesPage = () => {
             </button>
             <h1 className="text-xl font-bold text-white">Prayer Times</h1>
           </div>
-          <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <Bell className="w-6 h-6 text-white" />
+          <button 
+            onClick={() => setShowAthanSettings(true)}
+            className={`p-2 hover:bg-white/10 rounded-full transition-colors relative ${
+              athanSettings.enabled ? "text-white" : "text-white/50"
+            }`}
+          >
+            <Bell className="w-6 h-6" />
+            {athanSettings.enabled && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full" />
+            )}
           </button>
         </div>
       </motion.header>
+
+      {/* Athan Playing Indicator */}
+      <AnimatePresence>
+        {isAthanPlaying && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-20 left-4 right-4 z-50 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-4 shadow-xl"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Volume2 className="w-5 h-5 text-white animate-pulse" />
+                </div>
+                <div>
+                  <p className="text-white font-bold">{currentAthanPrayer} Athan</p>
+                  <p className="text-white/80 text-sm">Playing now...</p>
+                </div>
+              </div>
+              <button
+                onClick={stopAthan}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-white font-medium transition-colors"
+              >
+                Stop
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="px-4 py-6 space-y-6">
         {/* Location & Date Card */}
@@ -318,6 +370,19 @@ const PrayerTimesPage = () => {
           </p>
         </motion.div>
       </div>
+
+      {/* Athan Settings Modal */}
+      <AthanSettingsModal
+        open={showAthanSettings}
+        onClose={() => setShowAthanSettings(false)}
+        settings={athanSettings}
+        onUpdateSettings={updateAthanSettings}
+        onTogglePrayer={toggleAthanPrayer}
+        onRequestPermission={requestNotificationPermission}
+        isPlaying={isAthanPlaying}
+        onPlayTest={() => playAthan("Test")}
+        onStop={stopAthan}
+      />
     </div>
   );
 };
