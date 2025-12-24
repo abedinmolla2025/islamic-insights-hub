@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, Loader2 } from "lucide-react";
 import prayingMan from "@/assets/praying-man.webp";
 
 interface PrayerHeroCardProps {
-  location?: string;
   hijriDate?: string;
 }
 
 const PrayerHeroCard = ({ 
-  location = "New York", 
   hijriDate = "3 Rajab, 1447 AH" 
 }: PrayerHeroCardProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [location, setLocation] = useState<string>("Loading...");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   
   // Prayer times for demo (would come from API in real app)
   const prayerSchedule = [
@@ -22,6 +22,51 @@ const PrayerHeroCard = ({
     { name: "Maghrib", time: "18:45" },
     { name: "Isha", time: "20:15" },
   ];
+
+  // Get current location
+  useEffect(() => {
+    const getLocation = async () => {
+      if (!navigator.geolocation) {
+        setLocation("Location unavailable");
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            // Use OpenStreetMap Nominatim for free reverse geocoding
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+            );
+            const data = await response.json();
+            
+            const city = data.address?.city || 
+                        data.address?.town || 
+                        data.address?.village || 
+                        data.address?.county ||
+                        data.address?.state ||
+                        "Unknown";
+            
+            setLocation(city);
+          } catch (error) {
+            console.error("Error getting location name:", error);
+            setLocation("Unknown location");
+          }
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          setLocation("Location denied");
+          setIsLoadingLocation(false);
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+      );
+    };
+
+    getLocation();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -97,7 +142,11 @@ const PrayerHeroCard = ({
           {/* Location and Date */}
           <div className="flex items-center gap-4 text-sm opacity-90 mb-4">
             <div className="flex items-center gap-1.5">
-              <MapPin size={14} />
+              {isLoadingLocation ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <MapPin size={14} />
+              )}
               <span>{location}</span>
             </div>
             <span>•</span>
